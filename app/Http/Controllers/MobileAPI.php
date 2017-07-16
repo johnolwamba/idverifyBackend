@@ -6,12 +6,22 @@ use App\Blockings;
 use App\Scans;
 use App\User;
 use Response;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class MobileAPI extends Controller
 {
+
+    //logout
+    public function logout(){
+        $user = User::find(Auth::user()->id);
+        $user->api_token = '';
+        $user->save();
+        return Response::json(['message' => 'Logout success'], 200);
+    }
+
 
     public function login(Request $request)
     {
@@ -37,7 +47,13 @@ class MobileAPI extends Controller
                 if ($user->status == 0) {
                     return Response::json(array(['status' => 'error', 'error' => ['code' => 'invalid_credentials', 'message' => ['This account has been blocked']]]));
                 }else{
-                    return Response::json(array(['status'=>'success', 'token'=>'$token']));
+
+                    $token = bcrypt($id_number.$request->input('password'));
+
+                    $user->api_token = $token;
+                    $user->save();
+
+                    return Response::json(array(['status'=>'success','token'=>$token]));
                 }
             }
             else{
@@ -53,6 +69,20 @@ class MobileAPI extends Controller
 
     //scan
     public function scanUser(Request $request){
+        $closing_time = Carbon::now()->startOfDay()->addHour(19);
+        $opening_time = Carbon::now()->startOfDay()->addHour(7);
+        $check_if_closed = Carbon::now()->diffInMinutes($closing_time, false);
+        $check_if_opened = Carbon::now()->diffInMinutes($opening_time, false);
+
+
+        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
+            return Response::json(array(['status' => 'error','message' => 'Sorry this is no working day']));
+        }else if($check_if_closed < 1){
+            return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
+        }else if($check_if_opened < 1){
+            return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
+        }
+
         //validation
         $validator = Validator::make($request->all(), [
             'id_number'=>'required|exists:users,id_number',
@@ -65,7 +95,7 @@ class MobileAPI extends Controller
         $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
 
         $scans = new Scans();
-        $scans->staff_id = 1;
+        $scans->staff_id = Auth::user()->id;
         $scans->student_id = $student->id;
         $scans->save();
 
@@ -77,6 +107,20 @@ class MobileAPI extends Controller
 
     //scan
     public function blockUser(Request $request){
+        $closing_time = Carbon::now()->startOfDay()->addHour(19);
+        $opening_time = Carbon::now()->startOfDay()->addHour(7);
+        $check_if_closed = Carbon::now()->diffInMinutes($closing_time, false);
+        $check_if_opened = Carbon::now()->diffInMinutes($opening_time, false);
+
+
+        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
+            return Response::json(array(['status' => 'error','message' => 'Sorry this is no working day']));
+        }else if($check_if_closed < 1){
+            return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
+        }else if($check_if_opened < 1){
+            return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
+        }
+        
         //validation
         $validator = Validator::make($request->all(), [
             'id_number'=>'required|exists:users,id_number',
@@ -90,7 +134,7 @@ class MobileAPI extends Controller
         $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
 
         $blockings = new Blockings();
-        $blockings->staff_id = 1;
+        $blockings->staff_id = Auth::user()->id;
         $blockings->student_id = $student->id;
         $blockings->description = $request->get('description');
         $blockings->save();
@@ -103,6 +147,14 @@ class MobileAPI extends Controller
 
         return Response::json(array('status' => 'success','message' => 'Student has been Blocked'));
 
+    }
+
+
+
+    public function getAuthenticatedUser()
+    {
+        $user = Auth::user();
+        return Response::json(array('status' => 'success','user' => $user));
     }
 
 

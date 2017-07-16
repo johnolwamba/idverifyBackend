@@ -17,14 +17,37 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+
+//Route::group(['prefix'=>'api','middleware'=>'auth:api'], function(){
+//
+//    Route::resource('note','NoteController');
+//
+//});
+
+
+
+Route::group(['middleware' => 'auth:api'], function () {
+
+    Route::post('/logout', [
+        'uses'=>'MobileAPI@logout'
+    ]);
+
+    Route::get('/scanUser', [
+        'uses'=>'MobileAPI@scanUser'
+    ]);
+
+    Route::get('/blockUser', [
+        'uses'=>'MobileAPI@blockUser'
+    ]);
+
+    Route::get('/me', [
+        'uses'=>'MobileAPI@getAuthenticatedUser'
+    ]);
+
+});
+
+
 Route::post('/login', [
     'uses'=>'MobileAPI@login'
-]);
-
-Route::get('/scanUser', [
-    'uses'=>'MobileAPI@scanUser'
-]);
-
-Route::get('/blockUser', [
-    'uses'=>'MobileAPI@blockUser'
 ]);
