@@ -41,6 +41,10 @@ Route::group(['middleware' => 'auth:api'], function () {
         'uses'=>'MobileAPI@blockUser'
     ]);
 
+    Route::get('/myBlockedCards', [
+        'uses'=>'MobileAPI@myBlockedCards'
+    ]);
+
     Route::get('/me', [
         'uses'=>'MobileAPI@getAuthenticatedUser'
     ]);

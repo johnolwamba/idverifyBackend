@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Blockings;
 use App\Scans;
+use App\Students;
 use App\User;
 use Response;
 use Carbon\Carbon;
@@ -44,8 +45,15 @@ class MobileAPI extends Controller
             // verify the credentials and create a token for the user
             if (Auth::attempt($credentials)) {
                 $user = User::where('id_number', $id_number)->first();
+
+                $is_student = Students::where('user_id', $user->id)->first();
+                if($is_student != null){
+                    return Response::json(array('status' => 'error', 'message' => 'Students are not allowed to use the application'));
+                }
+
+
                 if ($user->status == 0) {
-                    return Response::json(array(['status' => 'error', 'error' => ['code' => 'invalid_credentials', 'message' => ['This account has been blocked']]]));
+                    return Response::json(array('status' => 'error', 'message' => 'This account has been blocked'));
                 }else{
 
                     $token = bcrypt($id_number.$request->input('password'));
@@ -53,15 +61,15 @@ class MobileAPI extends Controller
                     $user->api_token = $token;
                     $user->save();
 
-                    return Response::json(array(['status'=>'success','token'=>$token]));
+                    return Response::json(array('status'=>'success','token'=>$token,'name'=>$user->name,'id_number'=>$user->id_number,'email'=>$user->email));
                 }
             }
             else{
-                return Response::json(array(['status' => 'error', 'error' => ['code' => 'invalid_credentials', 'message' => ['Incorrect ID number/password']]]));
-                }
+                return Response::json(array('status' => 'error', 'message' => 'Incorrect ID number/password'));
+            }
 
         } catch(\Exception $e){
-            return Response::json(array(['status'=>'error', 'error' => ['code'=>'invalid_credentials','message'=>['No Account found for this ID number']]]));
+            return Response::json(array('status' => 'error', 'message' => 'No Account found for this ID number'));
         }
     }
 
@@ -74,14 +82,17 @@ class MobileAPI extends Controller
         $check_if_closed = Carbon::now()->diffInMinutes($closing_time, false);
         $check_if_opened = Carbon::now()->diffInMinutes($opening_time, false);
 
-
-        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
-            return Response::json(array(['status' => 'error','message' => 'Sorry this is no working day']));
-        }else if($check_if_closed < 1){
-            return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
-        }else if($check_if_opened < 1){
-            return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
+        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY) {
+            return Response::json(array('status' => 'error','message' => 'Sorry this is no school day'));
         }
+
+        // if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
+        //     return Response::json(array('status' => 'error','message' => 'Sorry this is no working day'));
+        // }else if($check_if_closed < 1){
+        //     return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
+        // }else if($check_if_opened < 1){
+        //     return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
+        // }
 
         //validation
         $validator = Validator::make($request->all(), [
@@ -112,15 +123,18 @@ class MobileAPI extends Controller
         $check_if_closed = Carbon::now()->diffInMinutes($closing_time, false);
         $check_if_opened = Carbon::now()->diffInMinutes($opening_time, false);
 
-
-        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
-            return Response::json(array(['status' => 'error','message' => 'Sorry this is no working day']));
-        }else if($check_if_closed < 1){
-            return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
-        }else if($check_if_opened < 1){
-            return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
+        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY) {
+            return Response::json(array('status' => 'error','message' => 'Sorry this is no school day'));
         }
-        
+
+        // if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
+        //     return Response::json(array('status' => 'error','message' => 'Sorry this is no working day'));
+        // }else if($check_if_closed < 1){
+        //     return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
+        // }else if($check_if_opened < 1){
+        //     return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
+        // }
+
         //validation
         $validator = Validator::make($request->all(), [
             'id_number'=>'required|exists:users,id_number',
@@ -134,7 +148,7 @@ class MobileAPI extends Controller
         $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
 
         $blockings = new Blockings();
-        $blockings->staff_id = Auth::user()->id;
+         $blockings->staff_id = Auth::user()->id;
         $blockings->student_id = $student->id;
         $blockings->description = $request->get('description');
         $blockings->save();
@@ -149,6 +163,15 @@ class MobileAPI extends Controller
 
     }
 
+
+    public function myBlockedCards(){
+       $blockings = User::with(['blockings' => function($query){
+       $query->orderBy('created_at','desc')->get();
+       } ])->where('status',0)->get();
+
+        //$blockings = Students::with('blockings')->get();
+        return Response::json(array('status' => 'success','blocked_users' => $blockings));
+    }
 
 
     public function getAuthenticatedUser()

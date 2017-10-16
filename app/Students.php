@@ -6,18 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Students extends Model
 {
+    protected $table = "students";
+
     public function user()
     {
-        return $this->belongsTo('App\Users');
+        return $this->belongsTo('App\User');
     }
 
     public function course()
     {
-        return $this->belongsTo('App\Course');
+        return $this->belongsTo('App\Courses');
     }
 
     public function scan()
     {
-        return $this->belongsTo('App\Scans');
+        return $this->hasMany('App\Scans');
     }
+
+    public function blockings()
+    {
+        return $this->hasMany('App\Blockings','student_id');
+    }
+
 }

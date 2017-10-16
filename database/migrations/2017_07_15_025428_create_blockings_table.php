@@ -16,9 +16,9 @@ class CreateBlockingsTable extends Migration
         Schema::create('blockings', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('staff_id')->unsigned();
-            $table->foreign('staff_id')->references('id')->on('users');
+            $table->foreign('staff_id')->references('id')->on('staff');
             $table->integer('student_id')->unsigned();
-            $table->foreign('student_id')->references('id')->on('users');
+            $table->foreign('student_id')->references('id')->on('students');
             $table->string('description');
             $table->timestamps();
         });

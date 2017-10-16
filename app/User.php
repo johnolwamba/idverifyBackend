@@ -30,14 +30,18 @@ class User extends Authenticatable
     ];
 
 
-    public function students()
+    public function student()
     {
-        return $this->hasMany('App\Students');
+        return $this->hasOne('App\Students');
     }
 
     public function staff()
     {
-        return $this->hasMany('App\Staff');
+        return $this->hasOne('App\Staff');
+    }
+
+    public function blockings(){
+        return $this->hasManyThrough('App\Blockings','App\Students','user_id','student_id');
     }
 
 

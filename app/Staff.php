@@ -8,17 +8,22 @@ class Staff extends Model
 {
     public function user()
     {
-        return $this->belongsTo('App\Users');
+        return $this->belongsTo('App\User');
     }
 
     public function gate()
     {
-        return $this->belongsTo('App\Gates');
+        return $this->belongsTo('App\Gates','station');
     }
 
     public function scan()
     {
-        return $this->belongsTo('App\Scans');
+        return $this->hasMany('App\Scans');
+    }
+
+    public function blockings()
+    {
+        return $this->hasMany('App\Blockings');
     }
 
 }

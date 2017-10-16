@@ -39,15 +39,15 @@ class UsersSeeder extends Seeder
         $user->assignRole($admin);
 
 
-        $user1 = new User;
-        $user1->name = 'Brenda Test';
-        $user1->email = 'brenda@gmail.com';
-        $user1->password = bcrypt('olwashop');
-        $user1->id_number = '123456';
-        $user1->status = 1;
+        $user = new User;
+        $user->name = 'Brenda Test';
+        $user->email = 'brenda@gmail.com';
+        $user->password = bcrypt('123456');
+        $user->id_number = '123456';
+        $user->status = 1;
 
-        $admin1 = Role::where('name','Student')->first();
-        $user1->assignRole($admin1);
+        $admin = Role::where('name','Student')->first();
+        $user->assignRole($admin);
 
     }
 }
