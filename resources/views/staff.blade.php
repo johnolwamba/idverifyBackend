@@ -59,11 +59,6 @@
                 @include('includes.message-block')
                 <div class="row">
                     <div class="col-lg-12">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <a href="" class="btn btn-primary btn-sm pull-right add-btn"><i class="fa fa-plus"></i> Add New</a>
-                            </div>
-                        </div>
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 All Guards
@@ -86,7 +81,7 @@
                                         <td class="center">{{ $allstaff->name }}</td>
                                         <td class="center">{{ $allstaff->id_number }}</td>
                                         <td class="center">{{ $allstaff->email }}</td>
-                                        <td class="center">{{ $allstaff->staff->station }}</td>
+                                        <td class="center">{{ $allstaff->staff->gate->name }}</td>
                                         <td class="center">
                                             <a href="{{ route('viewstaff', $allstaff->id) }}"><button type="button" class="btn btn-primary btn-sm btn-block">View</button></a>
                                         </td>

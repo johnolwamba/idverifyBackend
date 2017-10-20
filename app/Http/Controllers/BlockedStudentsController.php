@@ -13,4 +13,12 @@ class BlockedStudentsController extends Controller
         $blocked_users = Blockings::with(['student','staff'])->get();
         return view('blocked-students',['blocked_users'=>$blocked_users]);
     }
+
+
+    public function getBlocking($id){
+        $blockings= Blockings::with(['student','staff'])->get();
+        return view('blocking',['blockings'=>$blockings,'id'=>$id]);
+    }
+
+
 }

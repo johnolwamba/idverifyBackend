@@ -80,7 +80,7 @@
                                             <td class="center">{{ $user->students->user->name }}</td>
                                             <td class="center">{{ $user->staff->user->name }}</td>
                                             <td class="center">{{ $user->staff->gate->name }}</td>
-                                            <td class="center">{{ $user->created_at }}</td>
+                                            <td class="center">{{ Carbon\Carbon::parse($user->created_at)->toDayDateTimeString() }}</td>
                                         </tr>
                                     @endforeach
 

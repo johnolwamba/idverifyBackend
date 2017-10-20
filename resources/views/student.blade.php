@@ -121,9 +121,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-primary pull-right" >Save changes</button>
-                                    </div>
+                                    {{--<div class="form-group">--}}
+                                        {{--<button type="submit" class="btn btn-primary pull-right" >Save changes</button>--}}
+                                    {{--</div>--}}
                                 </form>
 
                             </div>

@@ -78,6 +78,10 @@ Route::group(['middleware' => 'auth'], function () {
         'as' => 'blocked-students', 'uses' => 'BlockedStudentsController@index'
     ]);
 
+    Route::get('/blocking/{id}',[
+        'as' => 'blocking', 'uses' => 'BlockedStudentsController@getBlocking'
+    ]);
+
 
     //gates
     Route::get('/gates',  [
@@ -111,7 +115,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     //reports
     Route::get('/reports',  [
-        'as' => 'reports', 'uses' => 'ReportsController@index'
+        'as' => 'reports', 'uses' => 'ReportsController@getReports'
     ]);
 
     /*

@@ -148,15 +148,16 @@
                                     </tr>
                                     </thead>
                                     <tbody>
+
                                     @foreach($blocked_users as $blocked_user)
                                         @if($blocked_user->student->user->status == '0')
-                                    <tr class="odd gradeX">
+                                     <tr class="odd gradeX">
                                         <td class="center">{{ $blocked_user->student->user->name }}</td>
                                         <td class="center">{{ $blocked_user->staff->user->name }}</td>
-                                        <td class="center">{{ $blocked_user->created_at }}</td>
+                                        <td class="center">{{ Carbon\Carbon::parse($blocked_user->created_at)->toDayDateTimeString() }}</td>
                                         <td class="center">{{ $blocked_user->description }}</td>
                                         <td class="center">
-                                            <button class="btn btn-primary btn-sm btn-block">View</button>
+                                            <a href="{{ route('blocking', $blocked_user->student->user->id) }}" class="btn btn-primary btn-sm btn-block">View</a>
                                         </td>
                                     </tr>
                                     @endif

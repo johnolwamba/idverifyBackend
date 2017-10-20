@@ -79,6 +79,7 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-md-12">
+                                                <label>Name:</label>
                                                 <input required class="form-control" type="text" name="name" placeholder="Staff Name" value="{{ $staff->name }}">
                                             </div>
                                         </div>
@@ -86,6 +87,7 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-md-12">
+                                                <label>Email:</label>
                                                 <input class="form-control" required type="email" name="email" placeholder="Email" value="{{ $staff->email }}">
                                             </div>
                                         </div>
@@ -93,14 +95,23 @@
                                     <div class="form-group">
                                         <div class="row">
                                             <div class="col-md-12">
+                                                <label>ID Number:</label>
+                                                <input class="form-control" required type="number" name="id_number" placeholder="ID Number" value="{{ $staff->id_number }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label>Station:</label>
                                                 <select class="form-control" id="station" name="station">
-                                                    {{--@foreach($gates as $gate)--}}
-                                                        {{--@if(($gate->id == $staff->staff->gate->id))--}}
-                                                            {{--<option value="{{ $gate->id }}" selected="selected">{{ $gate->name }}</option>--}}
-                                                        {{--@else--}}
-                                                            {{--<option value="{{ $gate->id }}">{{ $gate->name }}</option>--}}
-                                                        {{--@endif--}}
-                                                    {{--@endforeach--}}
+                                                    @foreach($gates as $gate)
+                                                        @if(($gate->id == $staff->staff->gate->id))
+                                                            <option value="{{ $gate->id }}" selected="selected">{{ $gate->name }}</option>
+                                                        @else
+                                                            <option value="{{ $gate->id }}">{{ $gate->name }}</option>
+                                                        @endif
+                                                    @endforeach
                                                 </select>
                                             </div>
                                         </div>

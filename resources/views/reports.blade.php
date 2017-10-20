@@ -53,16 +53,17 @@
             </div>
             <!-- /.col-lg-12 -->
         </div>
-        <!-- /.row -->
-        <div class="row">
+
+
+            <!-- /.col-lg-6 -->
             <div class="col-lg-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Area Chart Example
+                        Traffic per Date
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <div id="morris-area-chart"></div>
+                        <div style="height: 400px;"  id="chart-div"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -72,39 +73,11 @@
             <div class="col-lg-6">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        Bar Chart Example
+                        Gates Traffic
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
-                        <div id="morris-bar-chart"></div>
-                    </div>
-                    <!-- /.panel-body -->
-                </div>
-                <!-- /.panel -->
-            </div>
-            <!-- /.col-lg-6 -->
-            <div class="col-lg-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Line Chart Example
-                    </div>
-                    <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <div id="morris-line-chart"></div>
-                    </div>
-                    <!-- /.panel-body -->
-                </div>
-                <!-- /.panel -->
-            </div>
-            <!-- /.col-lg-6 -->
-            <div class="col-lg-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Donut Chart Example
-                    </div>
-                    <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <div id="morris-donut-chart"></div>
+                        <div style="height: 400px;"  id="poll_div"></div>
                     </div>
                     <!-- /.panel-body -->
                 </div>
@@ -112,12 +85,58 @@
             </div>
             <!-- /.col-lg-6 -->
 
+        <!-- /.col-lg-6 -->
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                   Blocked Users
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-example">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Blocked By</th>
+                            <th>Blocked Date</th>
+                            <th>Reason</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        @foreach($blocked_users as $blocked_user)
+                            @if($blocked_user->student->user->status == '0')
+                                <tr class="odd gradeX">
+                                    <td class="center">{{ $blocked_user->student->user->name }}</td>
+                                    <td class="center">{{ $blocked_user->staff->user->name }}</td>
+                                    <td class="center">{{ Carbon\Carbon::parse($blocked_user->created_at)->toDayDateTimeString() }}</td>
+                                    <td class="center">{{ $blocked_user->description }}</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                        </tbody>
+                    </table>
+                    <!-- /.table-responsive -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+
         </div>
         <!-- /.row -->
+
+        <div class="row">
+            {!! $lava->render('BarChart', 'Votes', 'poll_div') !!}
+            {!! $lava->render('DonutChart', 'IMDB', 'chart-div') !!}
+        </div>
+
     </div>
     <!-- /#page-wrapper -->
 
 </div>
+
+
 
 <!-- jQuery -->
 <script src="{{  asset('vendor/jquery/jquery.min.js') }}"></script>
@@ -134,7 +153,21 @@
 <script src="{{  asset('data/morris-data.js') }}"></script>
 
 <!-- Custom Theme JavaScript -->
-<script src="{{  asset('js/sb-admin-2.js"></script>
+<script src="{{  asset('js/sb-admin-2.js') }}"></script>
+<!-- DataTables JavaScript -->
+<script src="../vendor/datatables/js/jquery.dataTables.min.js"></script>
+<script src="../vendor/datatables-plugins/dataTables.bootstrap.min.js"></script>
+<script src="../vendor/datatables-responsive/dataTables.responsive.js"></script>
+
+
+<!-- Page-Level Demo Scripts - Tables - Use for reference -->
+<script>
+    $(document).ready(function() {
+        $('#dataTables-example').DataTable({
+            responsive: true
+        });
+    });
+</script>
 </body>
 
 </html>
