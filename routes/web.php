@@ -17,7 +17,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/logout',  [
         'as' => 'logout', 'uses' => 'HomeController@logout'
@@ -47,10 +47,15 @@ Route::group(['middleware' => 'auth'], function () {
        'as' => 'student.unblock', 'uses' => 'StudentsController@unblockStudent'
     ]);
 
-
     Route::post('/student/{id}/delete', [
         'as' => 'student.delete', 'uses' => 'StudentsController@deleteStudent'
     ])->where('id', '[0-9]+');
+
+    Route::post('/student/{id}/generatetoken', [
+        'as' => 'student.generatetoken', 'uses' => 'StudentsController@generateToken'
+    ])->where('id', '[0-9]+');
+
+
 
 
     //staff
@@ -118,35 +123,13 @@ Route::group(['middleware' => 'auth'], function () {
         'as' => 'reports', 'uses' => 'ReportsController@getReports'
     ]);
 
-    /*
-    Route::get('/add-article', [
-        'as' => 'article.add', 'uses' => 'ArticleController@addArticle'
-    ]);
+   Route::get('/analytics',[
+      'as' => 'analytics', 'uses' => 'ReportsController@getAnalytics'
+   ]);
 
-    Route::post('/article-create', [
-        'as' => 'article.create', 'uses' => 'ArticleController@addArticlePost'
+    Route::post('/analytics',[
+        'as' => 'analytics.process', 'uses' => 'ReportsController@postAnalytics'
     ]);
-
-    Route::post('/article/{id}/update', [
-        'as' => 'article.update', 'uses' => 'ArticleController@updateArticle'
-    ]);
-
-    Route::get('article/{id}',  [
-        'as' => 'article', 'uses' => 'ArticleController@getArticle'
-    ]);
-
-    Route::post('article/{id}/delete', [
-        'as' => 'article.delete', 'uses' => 'ArticleController@deleteArticle'
-    ]);
-
-    Route::post('article/{id}/publish', [
-        'as' => 'article.publish', 'uses' => 'ArticleController@publishArticle'
-    ]);
-
-    Route::post('article/{id}/unpublish', [
-        'as' => 'article.unpublish', 'uses' => 'ArticleController@unpublishArticle'
-    ]);
-    */
 
 
 });

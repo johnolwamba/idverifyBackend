@@ -19,6 +19,7 @@ class CreateStudentsTable extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->integer('course_id')->unsigned();
             $table->foreign('course_id')->references('id')->on('courses');
+            $table->string('qr_code',100)->unique();
             $table->timestamp('expiry_date');
             $table->timestamps();
         });

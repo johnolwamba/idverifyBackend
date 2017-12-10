@@ -1,50 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
+@section('title', 'Student')
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Admin::Student</title>
-
-    <!-- Bootstrap Core CSS -->
-    <link href="{{  asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-
-    <!-- MetisMenu CSS -->
-    <link href="{{  asset('vendor/metisMenu/metisMenu.min.css') }}" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link href="{{  asset('css/sb-admin-2.css') }}" rel="stylesheet">
-    <!-- DataTables CSS -->
-    <link href="../vendor/datatables-plugins/dataTables.bootstrap.css" rel="stylesheet">
-
-    <!-- DataTables Responsive CSS -->
-    <link href="../vendor/datatables-responsive/dataTables.responsive.css" rel="stylesheet">
-
-    <!-- Morris Charts CSS -->
-    <link href="{{  asset('vendor/morrisjs/morris.css') }}" rel="stylesheet">
-
-    <!-- Custom Fonts -->
-    <link href="{{  asset('vendor/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
-
-    <!-- HTML5 Shim and Respond.js') }} IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js') }} doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js') }}"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js') }}/1.4.2/respond.min.js') }}"></script>
-    <![endif]-->
-
-</head>
-
-<body>
-
-<div id="wrapper">
-
-    @include('includes/side-bar')
+@section('content')
 
     <div id="page-wrapper">
         <div class="row">
@@ -60,20 +18,30 @@
                     <div class="col-lg-12">
                         <div class="row">
                             <div class="col-md-12 pull-right">
-                                <div class="col-md-8"></div>
+                                <div class="col-md-6"></div>
                                 <div class="col-md-2">
+                                    @can('unblock-student')
                                     @if($student->status == '0')
-                                    <form class="form" action="{{ route('student.unblock',$student->id) }}" method="post">
-                                        {{ csrf_field() }}
-                                        <button type="submit" class="btn btn-success btn-sm pull-right add-btn"><i class="fa fa-arrow-right"></i> Unblock</button>
-                                    </form>
+                                            <a href="" data-toggle="modal" data-target="#myModal" class="btn btn-primary btn-sm pull-right add-btn"><i class="fa fa-plus"></i> Unblock</a>
                                     @endif
+                                    @endcan
                                 </div>
                                 <div class="col-md-1">
+                                    @can('delete-student')
                                     <form class="form" action="{{ route('student.delete',$student->id) }}" method="post">
                                         {{ csrf_field() }}
                                         <button type="submit" class="btn btn-danger btn-sm pull-right add-btn"><i class="fa fa-remove"></i> Delete</button>
                                     </form>
+                                     @endcan
+                                </div>
+
+                                <div class="col-md-2">
+                                    @can('delete-student')
+                                        <form class="form" action="{{ route('student.generatetoken',$student->id) }}" method="post">
+                                            {{ csrf_field() }}
+                                            <button type="submit" class="btn btn-info btn-sm pull-right add-btn"><i class="fa fa-refresh"></i> Generate Token</button>
+                                        </form>
+                                    @endcan
                                 </div>
 
 
@@ -121,6 +89,20 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                             <label>QR-Code</label>
+                                            </div>
+                                            <div class="col-md-2"> <button class="btn btn-primary" onclick="printDiv('printableArea')"><i class="fa fa-print"></i> Print</button></div>
+                                        </div>
+
+                                        <div class="col-lg-6" id="printableArea">
+                                            {!!QrCode::size(300)->generate($student->student->qr_code)!!}
+                                        </div>
+
+                                    </div>
                                     {{--<div class="form-group">--}}
                                         {{--<button type="submit" class="btn btn-primary pull-right" >Save changes</button>--}}
                                     {{--</div>--}}
@@ -131,6 +113,44 @@
                         </div>
                         <!-- /.panel -->
                     </div>
+
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Student Blocking History
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+
+                            <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Blocked By</th>
+                                    <th>Reason</th>
+                                    <th>Unblocked By</th>
+                                    <th>Recommendation</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @foreach($student_blockings as $student_blocking)
+                                    <tr class="odd gradeX">
+                                        <td class="center">{{ $student_blocking->created_at }}</td>
+                                        <td class="center">{{ $student_blocking->staff->user->name }}</td>
+                                        <td class="center">{{ $student_blocking->description }}</td>
+                                        <td class="center">{{ App\User::find($student_blocking->unblocker_id)->name }}</td>
+                                        <td class="center">{{ $student_blocking->recommendation }}</td>
+                                    </tr>
+                                @endforeach
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+
 
                 </div>
                 <!-- /.row -->
@@ -143,37 +163,51 @@
 
 </div>
 
-        <!-- /#wrapper -->
 
-        <!-- jQuery -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Unblock User</h4>
+                </div>
+                <form class="form" action="{{ route('student.unblock',['id'=>$student->id]) }}" method="POST">
+                    {{ csrf_field() }}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <textarea class="form-control" rows="3" type="text" name="recommendation" placeholder="Recommendation"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" >Save</button>
+                    </div>
+                </form>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
 
-        <!-- Bootstrap Core JavaScript -->
-        <script src="{{  asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
 
-        <!-- Metis Menu Plugin JavaScript -->
-        <script src="{{  asset('vendor/metisMenu/metisMenu.min.js') }}"></script>
+@endsection
+@section('scripts')
+    <script>
+        $('select').chosen();
 
-        <!-- Morris Charts JavaScript -->
-        <script src="{{  asset('vendor/raphael/raphael.min.js') }}"></script>
-        <script src="{{  asset('vendor/morrisjs/morris.min.js') }}"></script>
-        <script src="{{  asset('data/morris-data.js') }}"></script>
+        function printDiv(divName) {
+            var printContents = document.getElementById(divName).innerHTML;
+            var originalContents = document.body.innerHTML;
 
-        <!-- Custom Theme JavaScript -->
-        <script src="{{  asset('js/sb-admin-2.js') }}"></script>
-        <!-- DataTables JavaScript -->
-        <script src="{{  asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
-        <script src="{{  asset('vendor/datatables-plugins/dataTables.bootstrap.min.js') }}"></script>
-        <script src="{{  asset('vendor/datatables-responsive/dataTables.responsive.js') }}"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.7.0/chosen.jquery.min.js"></script>
-
-
-        <!-- Page-Level Demo Scripts - Tables - Use for reference -->
-        <script>
-            $(document).ready(function() {
-//                $('select').chosen();
-            });
-        </script>
-</body>
-
-</html>
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+        }
+    </script>
+@endsection

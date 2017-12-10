@@ -20,6 +20,9 @@ class CreateBlockingsTable extends Migration
             $table->integer('student_id')->unsigned();
             $table->foreign('student_id')->references('id')->on('students');
             $table->string('description');
+            $table->integer('unblocker_id')->nullable()->unsigned();
+            $table->foreign('unblocker_id')->references('id')->on('users');
+            $table->string('recommendation')->nullable();
             $table->timestamps();
         });
     }

@@ -65,10 +65,12 @@
                             <div class="col-md-12 pull-right">
                                 <div class="col-md-8"></div>
                                 <div class="col-md-2">
+                                    @can('unblock-student')
                                     <form class="form" action="{{route('student.unblock',$blocking->student->user_id)}}" method="post">
                                             {{ csrf_field() }}
                                             <button type="submit" class="btn btn-success btn-sm pull-right add-btn"><i class="fa fa-arrow-right"></i> Unblock</button>
                                         </form>
+                                        @endcan
                                 </div>
                             </div>
                         </div>

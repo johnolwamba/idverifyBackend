@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -12,18 +11,15 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-        $owner = new Role();
-        $owner->name  = 'Admin';
-        $owner->save();
+        $roles = [
+            'Admin',
+            'Staff',
+            'Student'
+        ];
 
-
-        $owner = new Role();
-        $owner->name  = 'Security';
-        $owner->save();
-
-        $owner = new Role();
-        $owner->name  = 'Student';
-        $owner->save();
+        foreach ($roles as $role){
+            $myroles = \Spatie\Permission\Models\Role::firstOrCreate(['guard_name' => 'web','name' => $role]);
+        }
 
     }
 }

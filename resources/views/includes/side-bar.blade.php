@@ -38,9 +38,11 @@
                 <li class="active">
                     <a href="{{ route('students') }}"><i class="fa fa-user-md fa-fw"></i> Students</a>
                 </li>
-                <li>
+                @can('view-staff')
+                 <li>
                     <a href="{{ route('staff') }}"><i class="fa fa-users fa-fw"></i> Staff</a>
                 </li>
+                @endcan
                 <li>
                     <a href="{{ route('blocked-students') }}"><i class="fa fa-lock fa-fw"></i> Blocked Students</a>
                 </li>
@@ -50,9 +52,14 @@
                 <li>
                     <a href="{{ route('scans') }}"><i class="fa fa-mobile-phone fa-fw"></i> Scans</a>
                 </li>
+                @can('view-reports')
                 <li>
                     <a href="{{ route('reports') }}"><i class="fa fa-bar-chart-o fa-fw"></i> Reports</a>
                 </li>
+                <li>
+                    <a href="{{ route('analytics') }}"><i class="fa fa-bar-chart-o fa-fw"></i> Analytics</a>
+                </li>
+                 @endcan
             </ul>
         </div>
         <!-- /.sidebar-collapse -->

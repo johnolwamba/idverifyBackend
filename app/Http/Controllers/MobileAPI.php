@@ -82,35 +82,28 @@ class MobileAPI extends Controller
         $check_if_closed = Carbon::now()->diffInMinutes($closing_time, false);
         $check_if_opened = Carbon::now()->diffInMinutes($opening_time, false);
 
-        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY) {
-            return Response::json(array('status' => 'error','message' => 'Sorry this is no school day'));
-        }
-
-        // if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
-        //     return Response::json(array('status' => 'error','message' => 'Sorry this is no working day'));
-        // }else if($check_if_closed < 1){
-        //     return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
-        // }else if($check_if_opened < 1){
-        //     return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
-        // }
-
         //validation
         $validator = Validator::make($request->all(), [
-            'id_number'=>'required|exists:users,id_number',
+            'qr_code'=>'required|exists:students,qr_code',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()->all(), 'status' => 400], 200);
         }
 
-        $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
+        if(Carbon::now()->gte($opening_time) && !Carbon::now()->gte($closing_time)){
+            $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
 
-        $scans = new Scans();
-        $scans->staff_id = Auth::user()->id;
-        $scans->student_id = $student->id;
-        $scans->save();
+            $scans = new Scans();
+            $scans->staff_id = Auth::user()->id;
+            $scans->student_id = $student->id;
+            $scans->save();
 
-        return Response::json(array('status' => 'success','student' => $student));
+            return Response::json(array('status' => 'success','student' => $student));
+
+        }else{
+            return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
+        }
 
     }
 
@@ -123,18 +116,6 @@ class MobileAPI extends Controller
         $check_if_closed = Carbon::now()->diffInMinutes($closing_time, false);
         $check_if_opened = Carbon::now()->diffInMinutes($opening_time, false);
 
-        if(Carbon::now()->dayOfWeek === Carbon::SUNDAY) {
-            return Response::json(array('status' => 'error','message' => 'Sorry this is no school day'));
-        }
-
-        // if(Carbon::now()->dayOfWeek === Carbon::SUNDAY || Carbon::now()->dayOfWeek === Carbon::SATURDAY) {
-        //     return Response::json(array('status' => 'error','message' => 'Sorry this is no working day'));
-        // }else if($check_if_closed < 1){
-        //     return Response::json(array('status' => 'error','message' => 'Sorry its beyond school hours.school is closed'));
-        // }else if($check_if_opened < 1){
-        //     return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
-        // }
-
         //validation
         $validator = Validator::make($request->all(), [
             'id_number'=>'required|exists:users,id_number',
@@ -145,29 +126,36 @@ class MobileAPI extends Controller
             return response()->json(['errors' => $validator->errors()->all(), 'status' => 400], 200);
         }
 
-        $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
 
-        $blockings = new Blockings();
-         $blockings->staff_id = Auth::user()->id;
-        $blockings->student_id = $student->id;
-        $blockings->description = $request->get('description');
-        $blockings->save();
+        if(Carbon::now()->gte($opening_time) && !Carbon::now()->gte($closing_time)){
+            $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
 
-        if($blockings->save()){
-            $user = User::where(['id_number'=>$request->get('id_number')])->first();
-            $user->status = 0;
-            $user->save();
+            $blockings = new Blockings();
+            $blockings->staff_id = Auth::user()->id;
+            $blockings->student_id = $student->id;
+            $blockings->description = $request->get('description');
+            $blockings->save();
+
+            if($blockings->save()){
+                $user = User::where(['id_number'=>$request->get('id_number')])->first();
+                $user->status = 0;
+                $user->save();
+            }
+
+            return Response::json(array('status' => 'success','message' => 'Student has been Blocked'));
+
+        }else{
+            return Response::json(array('status' => 'error','message' => 'Sorry its not yet school hours.not opened'));
         }
 
-        return Response::json(array('status' => 'success','message' => 'Student has been Blocked'));
 
     }
 
 
     public function myBlockedCards(){
-       $blockings = User::with(['blockings' => function($query){
-       $query->orderBy('created_at','desc')->get();
-       } ])->where('status',0)->get();
+        $blockings = User::with(['blockings' => function($query){
+            $query->orderBy('created_at','desc')->get();
+        } ])->where('status',0)->get();
 
         //$blockings = Students::with('blockings')->get();
         return Response::json(array('status' => 'success','blocked_users' => $blockings));

@@ -8,6 +8,9 @@ use Khill\Lavacharts\Lavacharts;
 use App\Blockings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Redirect;
+use Validator;
+
 
 class ReportsController extends Controller
 {
@@ -34,10 +37,10 @@ class ReportsController extends Controller
 
         $reasons->addStringColumn('Reasons')
             ->addNumberColumn('Percent')
-            ->addRow(array('Check Reviews', 5))
-            ->addRow(array('Watch Trailers', 2))
-            ->addRow(array('See Actors Other Work', 4))
-            ->addRow(array('Settle Argument', 89));
+            ->addRow(array('Phase 1 Front', $this->dateTraffic('Phase 1 Front')))
+            ->addRow(array('Phase 1 Back', $this->dateTraffic('Phase 1 Back')))
+            ->addRow(array('Phase 2 Main', $this->dateTraffic('Phase 2 Main')))
+            ->addRow(array('Phase 2 Library', $this->dateTraffic('Phase 2 Library')));
 
 
         $donutchart = $lava->DonutChart('IMDB', $reasons, [
@@ -78,5 +81,48 @@ class ReportsController extends Controller
         //dd($dailyData);
         return $dailyData;
     }
+
+    public function getAnalytics(){
+        $analytica = Blockings::with(['student','staff'])->whereBetween('created_at', ['2017-08-10', '2017-12-10'])->get();
+        //dd($analytica);
+        return view('analytics',['analytica '=>$analytica]);
+    }
+
+    public function postAnalytics(Request $request){
+//        $rules = [
+//            'start_date' => 'required',
+//            'report_type' => 'required',
+//            'end_date' => 'required',
+//        ];
+//        $validator = Validator::make($request->all(), $rules);
+//
+//        if ($validator->fails()) {
+//            return back()->withErrors($validator)->withInput();
+//        }
+
+
+
+        $start_date = Carbon::parse($request->input('start_date'))->format('Y-m-d');
+        $end_date = Carbon::parse($request->input('end_date'))->format('Y-m-d');
+        $report_type = $request->input('report_type');
+
+        if($report_type == "Blockages"){
+            $analytica = Blockings::with(['student','staff'])->whereBetween('created_at', [$start_date, $end_date])->get();
+            return view('analytics',['analytica '=>$analytica]);
+
+        }elseif ($report_type == "Number of Scans"){
+
+            $analytica  = Scans::with('staff','student')->whereBetween('created_at', [$start_date, $end_date])->get();
+            return view('analytics', ['analytica ' => $analytica]);
+
+        }else {
+            $analytica = Blockings::with(['student','staff'])->whereBetween('created_at', [$start_date, $end_date])->get();
+            return view('analytics',['analytica '=>$analytica]);
+        }
+
+    }
+
+
+
 
 }

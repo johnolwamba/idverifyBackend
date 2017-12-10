@@ -18,6 +18,11 @@ class Blockings extends Model
         return $this->belongsTo('App\Students','student_id');
     }
 
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
+
 
 
 }
