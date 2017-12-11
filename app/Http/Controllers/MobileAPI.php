@@ -92,11 +92,13 @@ class MobileAPI extends Controller
         }
 
         if(Carbon::now()->gte($opening_time) && !Carbon::now()->gte($closing_time)){
-            $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
+            $student1 = Students::where(['qr_code'=>$request->get('qr_code')])->first();
+
+            $student = User::where(['id'=>$student1->user_id])->with(['student'])->first();
 
             $scans = new Scans();
             $scans->staff_id = Auth::user()->id;
-            $scans->student_id = $student->id;
+            $scans->student_id = $student1->id;
             $scans->save();
 
             return Response::json(array('status' => 'success','student' => $student));
@@ -109,7 +111,7 @@ class MobileAPI extends Controller
 
 
 
-    //scan
+    //block
     public function blockUser(Request $request){
         $closing_time = Carbon::now()->startOfDay()->addHour(19);
         $opening_time = Carbon::now()->startOfDay()->addHour(7);
@@ -118,7 +120,7 @@ class MobileAPI extends Controller
 
         //validation
         $validator = Validator::make($request->all(), [
-            'id_number'=>'required|exists:users,id_number',
+            'qr_code'=>'required|exists:students,qr_code',
             'description'=>'required',
         ]);
 
@@ -128,18 +130,20 @@ class MobileAPI extends Controller
 
 
         if(Carbon::now()->gte($opening_time) && !Carbon::now()->gte($closing_time)){
-            $student = User::where(['id_number'=>$request->get('id_number')])->with(['students'])->first();
+            $student1 = Students::where(['qr_code'=>$request->get('qr_code')])->first();
+
+            $student = User::where(['id'=>$student1->user->id])->with(['student'])->first();
 
             $blockings = new Blockings();
             $blockings->staff_id = Auth::user()->id;
-            $blockings->student_id = $student->id;
+            $blockings->student_id = $student1->id;
             $blockings->description = $request->get('description');
             $blockings->save();
 
             if($blockings->save()){
-                $user = User::where(['id_number'=>$request->get('id_number')])->first();
-                $user->status = 0;
-                $user->save();
+              //  $user = User::where(['id_number'=>$request->get('id_number')])->first();
+                $student->status = 0;
+                $student->save();
             }
 
             return Response::json(array('status' => 'success','message' => 'Student has been Blocked'));
